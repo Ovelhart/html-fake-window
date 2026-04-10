@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Aviso — Segurança do Windows</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;font-family:'Segoe UI',system-ui,sans-serif;font-size:13px;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;user-select:none;
+  background:
+    radial-gradient(ellipse 70% 50% at 20% 80%,rgba(255,80,180,.18) 0%,transparent 55%),
+    radial-gradient(ellipse 50% 70% at 80% 20%,rgba(100,140,255,.15) 0%,transparent 55%),
+    radial-gradient(ellipse 60% 60% at 55% 50%,rgba(180,60,220,.1) 0%,transparent 60%),
+    linear-gradient(145deg,#0a0a1a 0%,#12083a 30%,#0a1840 60%,#18083a 100%);
+}
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 55% 40% at 35% 55%,rgba(255,120,200,.12) 0%,transparent 60%),
+             radial-gradient(ellipse 40% 55% at 68% 38%,rgba(120,160,255,.09) 0%,transparent 60%);
+  pointer-events:none;}
+
+.dialog{
+  position:fixed;width:380px;
+  background:rgba(243,243,243,.97);
+  backdrop-filter:blur(60px) saturate(1.8);
+  -webkit-backdrop-filter:blur(60px) saturate(1.8);
+  border:1px solid rgba(255,255,255,.65);
+  border-radius:8px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.25) inset,
+             0 2px 6px rgba(0,0,0,.12),
+             0 12px 32px rgba(0,0,0,.28),
+             0 32px 80px rgba(0,0,0,.22);
+  overflow:hidden;
+  animation:winOpen .22s cubic-bezier(.34,1.2,.64,1);
+}
+@keyframes winOpen{from{opacity:0;transform:scale(.93) translateY(10px);}to{opacity:1;transform:scale(1) translateY(0);}}
+
+.titlebar{
+  height:32px;
+  background:linear-gradient(180deg,#f9f9f9 0%,#f0f0f0 100%);
+  border-bottom:1px solid #d4d4d4;
+  display:flex;align-items:center;padding:0 0 0 10px;
+  cursor:move;
+}
+.titlebar-icon{width:16px;height:16px;margin-right:7px;flex-shrink:0;}
+.titlebar-text{flex:1;font-size:12px;color:#1a1a1a;font-weight:400;pointer-events:none;}
+.win-btns{display:flex;height:32px;}
+.wc{width:46px;height:32px;border:none;background:transparent;
+  display:flex;align-items:center;justify-content:center;cursor:default;transition:background .08s;}
+.wc svg{width:10px;height:10px;pointer-events:none;}
+.wc:hover{background:rgba(0,0,0,.08);}
+.wc.close{border-radius:0 8px 0 0;}
+.wc.close:hover{background:#c42b1c;}
+.wc.close:hover line{stroke:#fff!important;}
+
+.dialog-body{
+  background:#fff;padding:22px 22px 18px;
+  border-bottom:1px solid #e4e4e4;
+  display:flex;align-items:flex-start;gap:14px;
+}
+.dialog-icon{font-size:36px;line-height:1;flex-shrink:0;margin-top:2px;}
+.dialog-content{flex:1;}
+.dialog-title{font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:6px;}
+.dialog-msg{font-size:12px;color:#444;line-height:1.65;}
+.dialog-detail{
+  margin-top:10px;background:#fef3e2;border:1px solid #f0c060;
+  border-radius:4px;padding:8px 10px;font-size:11px;color:#7a4800;
+  display:flex;align-items:center;gap:6px;
+}
+
+.dialog-foot{padding:10px 12px 12px;display:flex;justify-content:flex-end;gap:7px;background:#f0f0f0;}
+.wbtn{
+  height:26px;min-width:80px;padding:0 14px;
+  font:12px 'Segoe UI',sans-serif;color:#1a1a1a;
+  background:#f0f0f0;border:1px solid #b0b0b0;border-radius:3px;
+  cursor:default;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 1px 0 rgba(255,255,255,.9) inset;
+  transition:background .07s,border-color .07s;outline:none;
+}
+.wbtn:hover{background:#e5f1fb;border-color:#7eb4ea;}
+.wbtn:active{background:#cce2f8;border-color:#5a9ad8;}
+.wbtn:focus{border-color:#7eb4ea;outline:2px solid rgba(0,120,212,.35);outline-offset:1px;}
+.wbtn.danger{background:#c42b1c;color:#fff;border-color:#9c2018;box-shadow:none;}
+.wbtn.danger:hover{background:#d43525;}
+.wbtn.secondary{background:#f0f0f0;}
+</style>
+</head>
+<body>
+<div class="dialog" id="dialog">
+  <div class="titlebar" id="titlebar">
+    <!-- Shield icon -->
+    <svg class="titlebar-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 1L2 3.5V8c0 3.3 2.5 5.8 6 7 3.5-1.2 6-3.7 6-7V3.5L8 1z" fill="#0078d4"/>
+      <path d="M5.5 7.5l1.5 1.5 3-3" stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="titlebar-text">Segurança do Windows</span>
+    <div class="win-btns">
+      <button class="wc" title="Minimizar" onclick="dialog.style.display='none'">
+        <svg viewBox="0 0 10 10"><rect x="0" y="4.5" width="10" height="1" fill="#4a4a4a"/></svg>
+      </button>
+      <button class="wc" title="Maximizar" style="opacity:.4;pointer-events:none;">
+        <svg viewBox="0 0 10 10"><path d="M.5.5h9v9H.5z" stroke="#4a4a4a" stroke-width="1" fill="none"/></svg>
+      </button>
+      <button class="wc close" title="Fechar" onclick="dialog.style.display='none'">
+        <svg viewBox="0 0 10 10" fill="none">
+          <line x1="1" y1="1" x2="9" y2="9" stroke="#4a4a4a" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="9" y1="1" x2="1" y2="9" stroke="#4a4a4a" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="dialog-body">
+    <div class="dialog-icon">⚠️</div>
+    <div class="dialog-content">
+      <div class="dialog-title">Vírus detectado!</div>
+      <div class="dialog-msg">O Windows Defender encontrou uma ameaça no seu computador. Recomendamos remover o arquivo infectado imediatamente para proteger seus dados.</div>
+      <div class="dialog-detail">
+        <span>🔍</span>
+        <span><strong>Ameaça:</strong> Trojan:Win32/Wacatac.B!ml &nbsp;·&nbsp; <strong>Arquivo:</strong> C:\Temp\setup.exe</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog-foot">
+    <button class="wbtn danger" id="btn-remove" autofocus>Remover</button>
+    <button class="wbtn secondary" id="btn-quarantine">Quarentena</button>
+    <button class="wbtn" id="btn-ignore">Ignorar</button>
+  </div>
+</div>
+
+<script>
+const dlg=document.getElementById('dialog');
+const bar=document.getElementById('titlebar');
+
+function center(){
+  dlg.style.left=Math.round((innerWidth-dlg.offsetWidth)/2)+'px';
+  dlg.style.top=Math.round((innerHeight-dlg.offsetHeight)/2)+'px';
+}
+window.addEventListener('load',center);
+window.addEventListener('resize',center);
+
+let drag=false,ox=0,oy=0;
+bar.addEventListener('mousedown',e=>{
+  if(e.target.closest('.wc'))return;
+  drag=true;ox=e.clientX-dlg.getBoundingClientRect().left;oy=e.clientY-dlg.getBoundingClientRect().top;e.preventDefault();
+});
+document.addEventListener('mousemove',e=>{
+  if(!drag)return;
+  dlg.style.left=Math.max(0,Math.min(e.clientX-ox,innerWidth-dlg.offsetWidth))+'px';
+  dlg.style.top=Math.max(0,Math.min(e.clientY-oy,innerHeight-dlg.offsetHeight))+'px';
+});
+document.addEventListener('mouseup',()=>drag=false);
+bar.addEventListener('touchstart',e=>{
+  if(e.target.closest('.wc'))return;
+  const t=e.touches[0];drag=true;ox=t.clientX-dlg.getBoundingClientRect().left;oy=t.clientY-dlg.getBoundingClientRect().top;
+},{passive:true});
+document.addEventListener('touchmove',e=>{
+  if(!drag)return;
+  const t=e.touches[0];
+  dlg.style.left=Math.max(0,Math.min(t.clientX-ox,innerWidth-dlg.offsetWidth))+'px';
+  dlg.style.top=Math.max(0,Math.min(t.clientY-oy,innerHeight-dlg.offsetHeight))+'px';
+},{passive:true});
+document.addEventListener('touchend',()=>drag=false);
+
+document.getElementById('btn-remove').onclick=()=>{
+  dlg.innerHTML=`<div style="padding:32px;text-align:center;">
+    <div style="font-size:40px;margin-bottom:12px;">✅</div>
+    <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Ameaça removida com sucesso!</div>
+    <div style="font-size:12px;color:#555;margin-bottom:20px;">O arquivo infectado foi excluído permanentemente.</div>
+    <button class="wbtn danger" onclick="window.close()" style="margin:auto;">Fechar</button>
+  </div>`;
+};
+document.getElementById('btn-quarantine').onclick=()=>dlg.style.display='none';
+document.getElementById('btn-ignore').onclick=()=>dlg.style.display='none';
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter')document.getElementById('btn-remove').click();
+  if(e.key==='Escape')document.getElementById('btn-ignore').click();
+});
+setTimeout(()=>document.getElementById('btn-remove').focus(),150);
+</script>
+</body>
+</html>

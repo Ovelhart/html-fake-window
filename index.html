@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>html-fake-window — Desktop</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --accent:#0078d4;--accent-hover:#106ebe;--accent-light:#ddeeff;
+  --bg:#f3f3f3;--border:rgba(0,0,0,.1);
+  --shadow:0 8px 32px rgba(0,0,0,.28);
+  --taskbar-h:48px;--r:8px;
+}
+html,body{width:100%;height:100%;font-family:'Segoe UI',system-ui,sans-serif;font-size:13px;overflow:hidden;user-select:none;}
+
+/* ── WALLPAPER (Windows 11 Bloom style) ── */
+#desktop{
+  width:100%;height:100%;position:relative;overflow:hidden;
+  background:
+    radial-gradient(ellipse 75% 55% at 18% 85%,rgba(255,60,170,.22) 0%,transparent 52%),
+    radial-gradient(ellipse 55% 70% at 82% 18%,rgba(80,130,255,.18) 0%,transparent 52%),
+    radial-gradient(ellipse 65% 65% at 58% 48%,rgba(170,50,220,.14) 0%,transparent 58%),
+    radial-gradient(ellipse 40% 40% at 35% 30%,rgba(255,100,180,.12) 0%,transparent 50%),
+    radial-gradient(ellipse 50% 50% at 70% 70%,rgba(100,60,200,.16) 0%,transparent 50%),
+    linear-gradient(145deg,#09091a 0%,#130832 25%,#0b1640 50%,#1a0838 75%,#09091a 100%);
+}
+#desktop::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 45% at 38% 58%,rgba(255,130,210,.1) 0%,transparent 60%),
+             radial-gradient(ellipse 45% 60% at 64% 36%,rgba(130,170,255,.08) 0%,transparent 60%);
+}
+
+/* ── DESKTOP ICONS ── */
+#desktop-icons{position:absolute;top:16px;left:16px;display:flex;flex-direction:column;gap:4px;}
+.desk-icon{display:flex;flex-direction:column;align-items:center;gap:4px;width:76px;padding:6px 4px;border-radius:6px;cursor:default;transition:background .12s;}
+.desk-icon:hover{background:rgba(255,255,255,.14);}
+.desk-icon.selected{background:rgba(255,255,255,.22);outline:1px solid rgba(255,255,255,.35);}
+.desk-icon-img{width:40px;height:40px;display:flex;align-items:center;justify-content:center;}
+.desk-icon-label{font-size:11px;color:#fff;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,.8);line-height:1.3;word-break:break-word;}
+
+/* ── TASKBAR ── */
+#taskbar{
+  position:absolute;bottom:0;left:0;right:0;height:var(--taskbar-h);
+  background:rgba(32,32,32,.92);
+  backdrop-filter:blur(40px) saturate(1.8);
+  -webkit-backdrop-filter:blur(40px) saturate(1.8);
+  border-top:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center;
+  z-index:9000;
+}
+#taskbar-center{display:flex;align-items:center;gap:2px;}
+.tb-sep{width:1px;height:22px;background:rgba(255,255,255,.12);margin:0 6px;}
+.tb-btn{
+  width:40px;height:40px;border:none;background:transparent;border-radius:6px;
+  cursor:default;display:flex;align-items:center;justify-content:center;
+  position:relative;transition:background .1s;flex-shrink:0;
+}
+.tb-btn:hover{background:rgba(255,255,255,.1);}
+.tb-btn:active{background:rgba(255,255,255,.06);}
+.tb-btn svg,.tb-btn img{width:22px;height:22px;pointer-events:none;}
+.tb-btn::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);
+  width:0;height:3px;background:rgba(255,255,255,.5);border-radius:2px;transition:width .15s;}
+.tb-btn.running::after{width:6px;background:rgba(255,255,255,.45);}
+.tb-btn.active::after{width:18px;background:var(--accent);}
+/* Tooltip */
+.tb-tip{
+  position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  background:#1c1c1c;color:#fff;font-size:11px;
+  padding:4px 9px;border-radius:5px;white-space:nowrap;pointer-events:none;
+  opacity:0;transition:opacity .15s;border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 4px 12px rgba(0,0,0,.3);
+}
+.tb-btn:hover .tb-tip{opacity:1;}
+
+#taskbar-right{position:absolute;right:0;height:100%;display:flex;align-items:center;padding-right:4px;}
+.sys-tray{display:flex;align-items:center;gap:2px;height:40px;padding:0 8px;border-radius:6px;cursor:default;transition:background .1s;}
+.sys-tray:hover{background:rgba(255,255,255,.09);}
+.sys-tray svg{width:14px;height:14px;opacity:.8;}
+#clock{font-size:11px;line-height:1.5;text-align:center;color:#ddd;padding:0 6px;min-width:54px;}
+
+/* ── START MENU ── */
+#start-menu{
+  position:absolute;bottom:calc(var(--taskbar-h) + 10px);left:50%;transform:translateX(-50%);
+  width:640px;
+  background:rgba(32,32,32,.95);
+  backdrop-filter:blur(60px) saturate(2);-webkit-backdrop-filter:blur(60px) saturate(2);
+  border-radius:12px;border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 20px 60px rgba(0,0,0,.55);
+  z-index:9500;display:none;
+  animation:smPop .2s cubic-bezier(.34,1.4,.64,1);
+  padding:28px 28px 16px;
+}
+#start-menu.visible{display:block;}
+@keyframes smPop{from{opacity:0;transform:translateX(-50%) translateY(14px) scale(.97);}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}}
+.sm-search{
+  width:100%;height:36px;background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);border-radius:20px;
+  display:flex;align-items:center;padding:0 14px;gap:8px;margin-bottom:22px;
+  transition:background .15s,border-color .15s;
+}
+.sm-search:focus-within{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);}
+.sm-search input{flex:1;border:none;outline:none;font:13px 'Segoe UI',sans-serif;background:transparent;color:#fff;}
+.sm-search input::placeholder{color:rgba(255,255,255,.4);}
+.sm-section-title{font-size:12px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:10px;}
+.sm-apps{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:20px;}
+.sm-app{display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 4px;border-radius:6px;cursor:default;transition:background .1s;}
+.sm-app:hover{background:rgba(255,255,255,.08);}
+.sm-app-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.sm-app-label{font-size:10px;color:rgba(255,255,255,.85);text-align:center;line-height:1.3;}
+.sm-footer{border-top:1px solid rgba(255,255,255,.08);padding-top:12px;display:flex;align-items:center;justify-content:space-between;}
+.sm-user{display:flex;align-items:center;gap:8px;}
+.sm-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;}
+.sm-username{font-size:12px;color:rgba(255,255,255,.85);}
+.sm-power{width:32px;height:32px;border:none;background:transparent;border-radius:6px;cursor:default;display:flex;align-items:center;justify-content:center;transition:background .1s;}
+.sm-power:hover{background:rgba(255,255,255,.09);}
+.sm-power svg{opacity:.75;}
+
+/* ── WINDOW BASE ── */
+.win-window{
+  position:fixed;
+  background:rgba(243,243,243,.96);
+  backdrop-filter:blur(30px) saturate(1.4);
+  -webkit-backdrop-filter:blur(30px) saturate(1.4);
+  border:1px solid rgba(0,0,0,.13);
+  border-radius:var(--r);
+  box-shadow:0 0 0 1px rgba(255,255,255,.55) inset,0 4px 12px rgba(0,0,0,.15),0 16px 48px rgba(0,0,0,.25);
+  overflow:hidden;z-index:100;min-width:300px;min-height:180px;
+  display:flex;flex-direction:column;transition:box-shadow .15s;
+}
+.win-window.focused{
+  box-shadow:0 0 0 1px rgba(255,255,255,.65) inset,0 4px 16px rgba(0,0,0,.2),0 20px 60px rgba(0,0,0,.4);
+}
+.win-window.minimizing{animation:winMin .15s ease forwards;}
+.win-window.restoring{animation:winRestore .18s cubic-bezier(.34,1.2,.64,1);}
+@keyframes winMin{to{opacity:0;transform:scale(.88) translateY(50px);}}
+@keyframes winRestore{from{opacity:0;transform:scale(.9) translateY(20px);}to{opacity:1;transform:none;}}
+.win-window.opening{animation:winRestore .2s cubic-bezier(.34,1.2,.64,1);}
+
+/* Titlebar */
+.win-titlebar{
+  height:32px;
+  background:linear-gradient(180deg,#f8f8f8 0%,#efeeee 100%);
+  border-bottom:1px solid #d8d8d8;
+  display:flex;align-items:center;padding:0 0 0 10px;
+  cursor:move;flex-shrink:0;
+}
+.win-icon{width:16px;height:16px;margin-right:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.win-title{flex:1;font-size:12px;color:#1a1a1a;font-weight:400;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.win-controls{display:flex;height:32px;flex-shrink:0;}
+.wc{width:46px;height:32px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:default;transition:background .08s;}
+.wc svg{width:10px;height:10px;pointer-events:none;}
+.wc:hover{background:rgba(0,0,0,.07);}
+.wc.close{border-radius:0 8px 0 0;}
+.wc.close:hover{background:#c42b1c;}
+.wc.close:hover line,.wc.close:hover path{stroke:#fff!important;}
+
+/* Body/Footer */
+.win-body{flex:1;overflow:auto;background:#fff;min-height:0;}
+.win-footer{border-top:1px solid #ddd;padding:8px 12px;display:flex;justify-content:flex-end;gap:7px;background:#f0f0f0;flex-shrink:0;}
+
+/* ── BUTTONS ── */
+.wbtn{
+  height:26px;min-width:78px;padding:0 12px;
+  font:12px 'Segoe UI',sans-serif;color:#1a1a1a;
+  background:#f0f0f0;border:1px solid #b0b0b0;border-radius:3px;
+  cursor:default;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 1px 0 rgba(255,255,255,.9) inset;
+  transition:background .07s,border-color .07s;outline:none;
+}
+.wbtn:hover{background:#e5f1fb;border-color:#7eb4ea;}
+.wbtn:active{background:#cce2f8;border-color:#5a9ad8;}
+.wbtn:focus{border-color:#7eb4ea;box-shadow:0 0 0 2px rgba(0,120,212,.3),0 1px 0 rgba(255,255,255,.9) inset;}
+.wbtn.primary{background:var(--accent);color:#fff;border-color:#005a9e;box-shadow:none;}
+.wbtn.primary:hover{background:var(--accent-hover);}
+
+/* ── EXPLORER ── */
+.explorer-toolbar{height:36px;border-bottom:1px solid #e4e4e4;background:#fafafa;display:flex;align-items:center;padding:0 8px;gap:4px;flex-shrink:0;}
+.exp-nav-btn{height:24px;padding:0 8px;background:transparent;border:1px solid transparent;border-radius:3px;cursor:default;font:11px 'Segoe UI',sans-serif;color:#555;display:flex;align-items:center;}
+.exp-nav-btn:hover{background:#e8e8e8;border-color:#ccc;}
+.explorer-addr{flex:1;height:24px;background:#fff;border:1px solid #ccc;border-radius:3px;display:flex;align-items:center;padding:0 8px;font-size:11px;color:#333;}
+.explorer-layout{flex:1;display:flex;min-height:0;}
+.explorer-sidebar{width:158px;border-right:1px solid #e8e8e8;background:#fafafa;padding:6px 0;overflow-y:auto;flex-shrink:0;}
+.sidebar-item{display:flex;align-items:center;gap:6px;padding:4px 10px;font-size:11px;color:#333;cursor:default;border-radius:4px;margin:0 4px;transition:background .08s;}
+.sidebar-item:hover{background:rgba(0,120,212,.07);}
+.sidebar-item.active{background:rgba(0,120,212,.1);color:var(--accent);}
+.sidebar-section{font-size:10px;color:#999;padding:6px 14px 2px;font-weight:600;letter-spacing:.5px;}
+.explorer-files{flex:1;display:flex;flex-wrap:wrap;align-content:flex-start;gap:6px;padding:10px;overflow:auto;}
+.file-item{display:flex;flex-direction:column;align-items:center;gap:4px;width:74px;padding:7px 5px;border-radius:4px;cursor:default;transition:background .08s;}
+.file-item:hover{background:rgba(0,120,212,.08);}
+.file-item.selected{background:rgba(0,120,212,.14);outline:1px solid rgba(0,120,212,.4);}
+.file-icon{width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:28px;}
+.file-label{font-size:10px;text-align:center;color:#1a1a1a;word-break:break-word;line-height:1.3;}
+.explorer-statusbar{height:22px;border-top:1px solid #e0e0e0;background:#f5f5f5;display:flex;align-items:center;padding:0 12px;font-size:11px;color:#666;flex-shrink:0;}
+
+/* ── ABOUT ── */
+.about-body{padding:28px 24px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;}
+.about-logo{width:72px;height:72px;display:flex;align-items:center;justify-content:center;}
+.about-name{font-size:22px;font-weight:300;color:#1a1a1a;}
+.about-version{font-size:12px;color:#777;}
+.about-desc{font-size:12px;color:#444;line-height:1.7;max-width:270px;}
+.about-badges{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.badge{padding:3px 10px;border-radius:12px;font-size:10px;font-weight:600;background:var(--accent-light);color:var(--accent);}
+
+/* ── DIALOG CARDS ── */
+.demo-grid{display:flex;flex-direction:column;gap:10px;padding:14px;}
+.demo-card{border:1px solid #e8e8e8;border-radius:7px;overflow:hidden;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.05);display:flex;flex-direction:column;}
+.demo-card-head{background:#f5f5f5;border-bottom:1px solid #eee;padding:8px 12px;font-size:11px;font-weight:600;color:#333;display:flex;align-items:center;gap:8px;}
+.demo-card-body{padding:10px 12px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.demo-card-msg{font-size:11px;color:#555;line-height:1.5;flex:1;}
+.demo-open-btn{height:24px;padding:0 12px;font:11px 'Segoe UI',sans-serif;color:#fff;background:var(--accent);border:1px solid #005a9e;border-radius:3px;cursor:default;display:flex;align-items:center;white-space:nowrap;flex-shrink:0;transition:background .07s;}
+.demo-open-btn:hover{background:var(--accent-hover);}
+
+/* ── PROPS ── */
+.props-tabs{display:flex;border-bottom:1px solid #d8d8d8;background:#f5f5f5;flex-shrink:0;}
+.props-tab{padding:7px 16px;font-size:12px;cursor:default;border-right:1px solid #ddd;transition:background .1s;border-bottom:2px solid transparent;}
+.props-tab.active{background:#fff;border-bottom-color:var(--accent);}
+.props-tab:hover:not(.active){background:rgba(0,0,0,.04);}
+.props-table{width:100%;border-collapse:collapse;}
+.props-table tr:nth-child(even){background:#f9f9f9;}
+.props-table td{padding:6px 12px;font-size:11px;border-bottom:1px solid #eeeeee;}
+.props-table td:first-child{font-weight:600;width:42%;color:#444;}
+.props-table td:last-child{color:#555;}
+
+/* ── NOTIFICATION ── */
+.notif{
+  position:fixed;bottom:calc(var(--taskbar-h) + 10px);right:10px;
+  width:360px;background:rgba(40,40,40,.97);
+  backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);
+  border:1px solid rgba(255,255,255,.1);border-radius:10px;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+  padding:14px 16px;z-index:9800;
+  display:flex;align-items:flex-start;gap:10px;
+  animation:notifIn .25s cubic-bezier(.34,1.2,.64,1);
+}
+@keyframes notifIn{from{opacity:0;transform:translateX(24px);}to{opacity:1;transform:none;}}
+.notif-app{font-size:10px;color:rgba(255,255,255,.5);margin-bottom:2px;}
+.notif-title{font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;}
+.notif-body{font-size:11px;color:rgba(255,255,255,.7);line-height:1.45;}
+.notif-close{width:20px;height:20px;border:none;background:transparent;cursor:default;display:flex;align-items:center;justify-content:center;border-radius:3px;transition:background .08s;margin-left:auto;}
+.notif-close:hover{background:rgba(255,255,255,.1);}
+
+/* ── CONTEXT MENU ── */
+.ctx-menu{
+  position:fixed;background:rgba(38,38,38,.97);
+  backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);
+  border:1px solid rgba(255,255,255,.1);border-radius:8px;
+  box-shadow:0 8px 24px rgba(0,0,0,.45);
+  padding:4px;z-index:9900;min-width:210px;
+  animation:ctxPop .12s ease;
+}
+@keyframes ctxPop{from{opacity:0;transform:scale(.96);}to{opacity:1;transform:none;}}
+.ctx-item{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:5px;font-size:12px;cursor:default;color:#eee;transition:background .08s;}
+.ctx-item:hover{background:rgba(255,255,255,.1);}
+.ctx-item svg{width:14px;height:14px;opacity:.7;flex-shrink:0;}
+.ctx-sep{height:1px;background:rgba(255,255,255,.08);margin:3px 8px;}
+
+/* ── RESIZE HANDLE ── */
+.resize-handle{position:absolute;bottom:0;right:0;width:14px;height:14px;cursor:se-resize;z-index:10;}
+.resize-e{position:absolute;top:32px;right:0;width:5px;bottom:0;cursor:e-resize;z-index:10;}
+.resize-s{position:absolute;bottom:0;left:32px;right:5px;height:5px;cursor:s-resize;z-index:10;}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,.2);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div id="desktop">
+
+  <!-- Desktop Icons -->
+  <div id="desktop-icons">
+    <div class="desk-icon" ondblclick="openWindow('explorer')">
+      <div class="desk-icon-img">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="40" height="40">
+          <rect x="4" y="14" width="40" height="28" rx="3" fill="#FFB900"/>
+          <rect x="4" y="20" width="40" height="22" rx="2" fill="#FFC107"/>
+          <rect x="4" y="14" width="18" height="8" rx="2" fill="#FFB900"/>
+        </svg>
+      </div>
+      <span class="desk-icon-label">html-fake-window</span>
+    </div>
+    <div class="desk-icon" ondblclick="openWindow('about')">
+      <div class="desk-icon-img">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="40" height="40">
+          <rect x="8" y="4" width="32" height="40" rx="3" fill="#0078d4"/>
+          <rect x="13" y="13" width="22" height="2.5" rx="1.25" fill="white" opacity=".85"/>
+          <rect x="13" y="19" width="22" height="1.8" rx=".9" fill="white" opacity=".6"/>
+          <rect x="13" y="24" width="16" height="1.8" rx=".9" fill="white" opacity=".6"/>
+          <rect x="13" y="29" width="19" height="1.8" rx=".9" fill="white" opacity=".6"/>
+          <circle cx="24" cy="39" r="5" fill="white"/>
+          <text x="24" y="43" text-anchor="middle" font-size="8" font-weight="bold" fill="#0078d4">i</text>
+        </svg>
+      </div>
+      <span class="desk-icon-label">README.md</span>
+    </div>
+    <div class="desk-icon" ondblclick="openWindow('dialog')">
+      <div class="desk-icon-img">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="40" height="40">
+          <rect x="6" y="10" width="36" height="28" rx="4" fill="#f0f0f0" stroke="#bbb" stroke-width="1.5"/>
+          <rect x="6" y="10" width="36" height="11" rx="4" fill="#e4e4e4"/>
+          <rect x="14" y="31" width="10" height="5" rx="2.5" fill="#0078d4"/>
+          <rect x="27" y="31" width="10" height="5" rx="2.5" fill="#ccc"/>
+        </svg>
+      </div>
+      <span class="desk-icon-label">Dialog Demo</span>
+    </div>
+    <div class="desk-icon" ondblclick="openWindow('props')">
+      <div class="desk-icon-img">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="40" height="40">
+          <circle cx="24" cy="24" r="20" fill="#f0f0f0" stroke="#bbb" stroke-width="1.5"/>
+          <circle cx="24" cy="24" r="7" fill="#0078d4"/>
+          <line x1="24" y1="4" x2="24" y2="12" stroke="#bbb" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="24" y1="36" x2="24" y2="44" stroke="#bbb" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="4" y1="24" x2="12" y2="24" stroke="#bbb" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="36" y1="24" x2="44" y2="24" stroke="#bbb" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="desk-icon-label">Propriedades</span>
+    </div>
+  </div>
+
+  <!-- TASKBAR -->
+  <div id="taskbar">
+    <div id="taskbar-center">
+      <!-- Start -->
+      <button class="tb-btn" id="btn-start" onclick="toggleStart()">
+        <div class="tb-tip">Iniciar</div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+          <rect x="2" y="2" width="7" height="7" rx="1" fill="#F35325"/>
+          <rect x="11" y="2" width="7" height="7" rx="1" fill="#81BC06"/>
+          <rect x="2" y="11" width="7" height="7" rx="1" fill="#05A6F0"/>
+          <rect x="11" y="11" width="7" height="7" rx="1" fill="#FFBA08"/>
+        </svg>
+      </button>
+      <!-- Search bar -->
+      <button class="tb-btn" onclick="openWindow('about')" style="width:190px;border-radius:20px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);">
+        <div class="tb-tip">Pesquisar</div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="14" height="14" style="margin-right:6px;opacity:.5;flex-shrink:0;"><circle cx="8" cy="8" r="5.5" stroke="#fff" stroke-width="1.5" fill="none"/><line x1="12.5" y1="12.5" x2="17" y2="17" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span style="font-size:12px;color:rgba(255,255,255,.45);flex:1;text-align:left;">Pesquisar</span>
+      </button>
+      <div class="tb-sep"></div>
+      <!-- Pinned apps -->
+      <button class="tb-btn running" id="tb-explorer" onclick="tbToggle('explorer')">
+        <div class="tb-tip">Explorador de Arquivos</div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><rect x="2" y="6" width="18" height="14" rx="1.5" fill="#FFB900"/><rect x="2" y="10" width="18" height="10" rx="1" fill="#FFC107"/><rect x="2" y="6" width="8" height="5" rx="1" fill="#FFB900"/></svg>
+      </button>
+      <button class="tb-btn" id="tb-about" onclick="tbToggle('about')">
+        <div class="tb-tip">README</div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><rect x="3" y="2" width="16" height="18" rx="2" fill="#0078d4" opacity=".9"/><rect x="6" y="7" width="10" height="1.5" rx=".75" fill="white" opacity=".8"/><rect x="6" y="10.5" width="10" height="1.2" rx=".6" fill="white" opacity=".55"/><rect x="6" y="13.5" width="7" height="1.2" rx=".6" fill="white" opacity=".55"/></svg>
+      </button>
+      <button class="tb-btn" id="tb-dialog" onclick="tbToggle('dialog')">
+        <div class="tb-tip">Dialog Demo</div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><rect x="2" y="4" width="18" height="14" rx="2" fill="#f0f0f0" stroke="#aaa" stroke-width=".8"/><rect x="2" y="4" width="18" height="6" rx="2" fill="#e4e4e4"/><rect x="5" y="13" width="5" height="2" rx="1" fill="#0078d4"/><rect x="12" y="13" width="5" height="2" rx="1" fill="#ccc"/></svg>
+      </button>
+      <button class="tb-btn" id="tb-props" onclick="tbToggle('props')">
+        <div class="tb-tip">Propriedades</div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="#f0f0f0" stroke="#bbb" stroke-width=".8"/><circle cx="11" cy="11" r="3" fill="#0078d4"/><line x1="11" y1="3" x2="11" y2="6" stroke="#bbb" stroke-width="1.3"/><line x1="11" y1="16" x2="11" y2="19" stroke="#bbb" stroke-width="1.3"/><line x1="3" y1="11" x2="6" y2="11" stroke="#bbb" stroke-width="1.3"/><line x1="16" y1="11" x2="19" y2="11" stroke="#bbb" stroke-width="1.3"/></svg>
+      </button>
+    </div>
+
+    <!-- System Tray -->
+    <div id="taskbar-right">
+      <div class="sys-tray">
+        <svg viewBox="0 0 14 14" fill="none"><path d="M1 4C3.5 1.5 10.5 1.5 13 4" stroke="rgba(255,255,255,.7)" stroke-width="1.2" stroke-linecap="round"/><path d="M3 6.5C4.5 5 9.5 5 11 6.5" stroke="rgba(255,255,255,.7)" stroke-width="1.2" stroke-linecap="round"/><path d="M5 9C6 8 8 8 9 9" stroke="rgba(255,255,255,.7)" stroke-width="1.2" stroke-linecap="round"/><circle cx="7" cy="11.5" r=".9" fill="rgba(255,255,255,.7)"/></svg>
+        <svg viewBox="0 0 14 14" fill="none"><path d="M3 5H1.5a.5.5 0 00-.5.5v3a.5.5 0 00.5.5H3l3 2.5V2.5L3 5z" fill="rgba(255,255,255,.7)"/><path d="M9 5.5a2 2 0 010 3" stroke="rgba(255,255,255,.7)" stroke-width="1.2" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="9" rx="1.5" stroke="rgba(255,255,255,.6)" stroke-width="1.1"/><rect x="3" y="5" width="8" height="5" rx=".5" fill="rgba(255,255,255,.15)"/><line x1="7" y1="12" x2="7" y2="13.5" stroke="rgba(255,255,255,.5)" stroke-width="1"/><line x1="4.5" y1="13.5" x2="9.5" y2="13.5" stroke="rgba(255,255,255,.5)" stroke-width="1" stroke-linecap="round"/></svg>
+      </div>
+      <div id="clock" class="sys-tray"></div>
+    </div>
+  </div>
+
+  <!-- START MENU -->
+  <div id="start-menu">
+    <div class="sm-search">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4" stroke="rgba(255,255,255,.4)" stroke-width="1.3"/><line x1="9.5" y1="9.5" x2="13" y2="13" stroke="rgba(255,255,255,.4)" stroke-width="1.3" stroke-linecap="round"/></svg>
+      <input type="text" placeholder="Pesquisar aplicativos, configurações e arquivos" id="sm-search-input" oninput="filterApps(this.value)"/>
+    </div>
+    <div class="sm-section-title" id="sm-pinned-label">Fixado</div>
+    <div class="sm-apps" id="sm-apps-grid">
+      <div class="sm-app" data-label="explorador" onclick="openWindow('explorer');toggleStart()">
+        <div class="sm-app-icon" style="background:rgba(255,180,0,.15);">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" width="26" height="26"><rect x="2" y="6" width="18" height="14" rx="1.5" fill="#FFB900"/><rect x="2" y="10" width="18" height="10" rx="1" fill="#FFC107"/><rect x="2" y="6" width="8" height="5" rx="1" fill="#FFB900"/></svg>
+        </div>
+        <span class="sm-app-label">Explorador</span>
+      </div>
+      <div class="sm-app" data-label="dialog demo" onclick="openWindow('dialog');toggleStart()">
+        <div class="sm-app-icon" style="background:rgba(0,120,212,.15);">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" width="26" height="26"><rect x="2" y="4" width="18" height="14" rx="2" fill="#f0f0f0" stroke="#aaa" stroke-width=".7"/><rect x="2" y="4" width="18" height="6" rx="2" fill="#ddd"/><rect x="5" y="13" width="5" height="2" rx="1" fill="#0078d4"/><rect x="12" y="13" width="5" height="2" rx="1" fill="#ccc"/></svg>
+        </div>
+        <span class="sm-app-label">Dialog</span>
+      </div>
+      <div class="sm-app" data-label="sobre readme" onclick="openWindow('about');toggleStart()">
+        <div class="sm-app-icon" style="background:rgba(0,120,212,.12);">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" width="26" height="26"><rect x="3" y="2" width="16" height="18" rx="2" fill="#0078d4" opacity=".9"/><rect x="6" y="7" width="10" height="1.5" rx=".75" fill="white" opacity=".8"/><rect x="6" y="10.5" width="10" height="1.2" rx=".6" fill="white" opacity=".55"/><rect x="6" y="13.5" width="7" height="1.2" rx=".6" fill="white" opacity=".55"/></svg>
+        </div>
+        <span class="sm-app-label">README</span>
+      </div>
+      <div class="sm-app" data-label="propriedades" onclick="openWindow('props');toggleStart()">
+        <div class="sm-app-icon" style="background:rgba(255,255,255,.07);">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" width="26" height="26"><circle cx="11" cy="11" r="8.5" fill="rgba(255,255,255,.1)" stroke="rgba(255,255,255,.3)" stroke-width=".8"/><circle cx="11" cy="11" r="3" fill="#0078d4"/><line x1="11" y1="2" x2="11" y2="5.5" stroke="rgba(255,255,255,.4)" stroke-width="1.3"/><line x1="11" y1="16.5" x2="11" y2="20" stroke="rgba(255,255,255,.4)" stroke-width="1.3"/><line x1="2" y1="11" x2="5.5" y2="11" stroke="rgba(255,255,255,.4)" stroke-width="1.3"/><line x1="16.5" y1="11" x2="20" y2="11" stroke="rgba(255,255,255,.4)" stroke-width="1.3"/></svg>
+        </div>
+        <span class="sm-app-label">Propriedades</span>
+      </div>
+    </div>
+    <div class="sm-footer">
+      <div class="sm-user">
+        <div class="sm-avatar">U</div>
+        <span class="sm-username">Usuário</span>
+      </div>
+      <button class="sm-power" title="Energia">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1v6" stroke="rgba(255,255,255,.7)" stroke-width="1.4" stroke-linecap="round"/><path d="M5 3.2A6 6 0 1011 3.2" stroke="rgba(255,255,255,.7)" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div><!-- /desktop -->
+
+<!-- CONTEXT MENU -->
+<div id="ctx-menu" class="ctx-menu" style="display:none">
+  <div class="ctx-item" onclick="closeCtx()">
+    <svg viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="1.5" stroke="rgba(255,255,255,.65)" stroke-width="1.1"/><circle cx="4.5" cy="5" r="1.2" fill="rgba(255,255,255,.65)"/><path d="M1 9l3-3 3 3 2-2 3 3" stroke="rgba(255,255,255,.65)" stroke-width="1.1" stroke-linejoin="round"/></svg>
+    Exibição
+  </div>
+  <div class="ctx-item" onclick="openWindow('about');closeCtx()">
+    <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="rgba(255,255,255,.65)" stroke-width="1.1"/><path d="M7 6.5v3.5" stroke="rgba(255,255,255,.65)" stroke-width="1.1" stroke-linecap="round"/><circle cx="7" cy="4.5" r=".75" fill="rgba(255,255,255,.65)"/></svg>
+    Sobre
+  </div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="openAllWindows();closeCtx()">
+    <svg viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="rgba(255,255,255,.65)" stroke-width="1.1"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="rgba(255,255,255,.65)" stroke-width="1.1"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="rgba(255,255,255,.65)" stroke-width="1.1"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="rgba(255,255,255,.65)" stroke-width="1.1"/></svg>
+    Abrir todas as janelas
+  </div>
+  <div class="ctx-item" onclick="closeAllWindows();closeCtx()">
+    <svg viewBox="0 0 14 14" fill="none"><line x1="2" y1="2" x2="12" y2="12" stroke="rgba(255,255,255,.65)" stroke-width="1.1" stroke-linecap="round"/><line x1="12" y1="2" x2="2" y2="12" stroke="rgba(255,255,255,.65)" stroke-width="1.1" stroke-linecap="round"/></svg>
+    Fechar todas
+  </div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="showNotif('html-fake-window','Repositório carregado!','Clique duplo nos ícones para abrir janelas.');closeCtx()">
+    <svg viewBox="0 0 14 14" fill="none"><path d="M7 1a4 4 0 014 4c0 2.5 1 3.5 1 5H2c0-1.5 1-2.5 1-5a4 4 0 014-4z" stroke="rgba(255,255,255,.65)" stroke-width="1.1"/><path d="M5.5 10.5a1.5 1.5 0 003 0" stroke="rgba(255,255,255,.65)" stroke-width="1.1"/></svg>
+    Testar notificação
+  </div>
+</div>
+
+<script>
+// ── CLOCK ──
+function tick(){
+  const n=new Date();
+  const h=n.getHours().toString().padStart(2,'0');
+  const m=n.getMinutes().toString().padStart(2,'0');
+  const d=n.getDate().toString().padStart(2,'0');
+  const mo=(n.getMonth()+1).toString().padStart(2,'0');
+  const y=n.getFullYear();
+  document.getElementById('clock').innerHTML=`<strong style="font-size:12px;">${h}:${m}</strong><br><span style="font-size:10px;">${d}/${mo}/${y}</span>`;
+}
+tick(); setInterval(tick,30000);
+
+// ── START MENU ──
+let startOpen=false;
+function toggleStart(){
+  startOpen=!startOpen;
+  document.getElementById('start-menu').classList.toggle('visible',startOpen);
+  document.getElementById('btn-start').classList.toggle('active',startOpen);
+  if(startOpen){ document.getElementById('sm-search-input').focus(); }
+}
+document.addEventListener('mousedown',e=>{
+  if(startOpen&&!e.target.closest('#start-menu')&&!e.target.closest('#btn-start')) toggleStart();
+});
+
+function filterApps(q){
+  const apps=document.querySelectorAll('#sm-apps-grid .sm-app');
+  const s=q.toLowerCase().trim();
+  apps.forEach(a=>{
+    a.style.display=(!s||a.dataset.label.includes(s))?'':'none';
+  });
+  document.getElementById('sm-pinned-label').textContent=s?'Resultados':'Fixado';
+}
+
+// ── CONTEXT MENU ──
+document.getElementById('desktop').addEventListener('contextmenu',e=>{
+  if(e.target.closest('.win-window')||e.target.closest('#taskbar')||e.target.closest('#start-menu')) return;
+  e.preventDefault();
+  const m=document.getElementById('ctx-menu');
+  m.style.display='block';
+  const x=Math.min(e.clientX,innerWidth-m.offsetWidth-4);
+  const y=Math.min(e.clientY,innerHeight-m.offsetHeight-4);
+  m.style.left=x+'px'; m.style.top=y+'px';
+});
+function closeCtx(){document.getElementById('ctx-menu').style.display='none';}
+document.addEventListener('mousedown',e=>{if(!e.target.closest('#ctx-menu')) closeCtx();});
+
+// ── WINDOW MANAGER ──
+let zTop=200;
+const winState={}; // id → { el, minimized, maxed, prevRect }
+
+function bringToFront(el){
+  zTop++;
+  el.style.zIndex=zTop;
+  document.querySelectorAll('.win-window').forEach(w=>w.classList.remove('focused'));
+  el.classList.add('focused');
+  const id=el.dataset.wid;
+  document.querySelectorAll('.tb-btn[id^="tb-"]').forEach(b=>b.classList.remove('active'));
+  const tb=document.getElementById('tb-'+id);
+  if(tb){ tb.classList.add('active'); tb.classList.remove('running'); }
+}
+
+function makeDraggable(win,titlebar){
+  let drag=false,ox=0,oy=0;
+  titlebar.addEventListener('mousedown',e=>{
+    if(e.target.closest('.wc')||e.target.closest('.win-controls')) return;
+    // Unmaximize if dragging a maximized window
+    const id=win.dataset.wid;
+    if(winState[id]&&winState[id].maxed){
+      const r=winState[id].prevRect;
+      win.style.left=(e.clientX-parseInt(r.width)/2)+'px';
+      win.style.top='20px';
+      win.style.width=r.width; win.style.height=r.height;
+      win.style.borderRadius='';
+      winState[id].maxed=false;
+    }
+    drag=true;
+    ox=e.clientX-win.getBoundingClientRect().left;
+    oy=e.clientY-win.getBoundingClientRect().top;
+    bringToFront(win);
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!drag) return;
+    const x=Math.max(0,Math.min(e.clientX-ox,innerWidth-win.offsetWidth));
+    const y=Math.max(0,Math.min(e.clientY-oy,innerHeight-win.offsetHeight));
+    win.style.left=x+'px'; win.style.top=y+'px';
+  });
+  document.addEventListener('mouseup',()=>drag=false);
+  // Touch
+  titlebar.addEventListener('touchstart',e=>{
+    if(e.target.closest('.wc')) return;
+    const t=e.touches[0];
+    drag=true; ox=t.clientX-win.getBoundingClientRect().left; oy=t.clientY-win.getBoundingClientRect().top;
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(!drag) return;
+    const t=e.touches[0];
+    const x=Math.max(0,Math.min(t.clientX-ox,innerWidth-win.offsetWidth));
+    const y=Math.max(0,Math.min(t.clientY-oy,innerHeight-win.offsetHeight));
+    win.style.left=x+'px'; win.style.top=y+'px';
+  },{passive:true});
+  document.addEventListener('touchend',()=>drag=false);
+  // Double-click titlebar to maximize
+  titlebar.addEventListener('dblclick',e=>{
+    if(e.target.closest('.wc')||e.target.closest('.win-controls')) return;
+    toggleMax(win.dataset.wid);
+  });
+}
+
+function makeResizable(win){
+  // SE corner
+  const se=document.createElement('div');
+  se.style.cssText='position:absolute;bottom:0;right:0;width:16px;height:16px;cursor:se-resize;z-index:10;';
+  win.appendChild(se);
+  // S edge
+  const s=document.createElement('div');
+  s.style.cssText='position:absolute;bottom:0;left:8px;right:8px;height:5px;cursor:s-resize;z-index:10;';
+  win.appendChild(s);
+  // E edge
+  const e_=document.createElement('div');
+  e_.style.cssText='position:absolute;right:0;top:32px;bottom:5px;width:5px;cursor:e-resize;z-index:10;';
+  win.appendChild(e_);
+
+  let rs=false,dir='',sx,sy,sw,sh,sl,st;
+  const startResize=(e,d)=>{rs=true;dir=d;sx=e.clientX;sy=e.clientY;sw=win.offsetWidth;sh=win.offsetHeight;sl=win.getBoundingClientRect().left;st=win.getBoundingClientRect().top;e.preventDefault();e.stopPropagation();};
+  se.addEventListener('mousedown',e=>startResize(e,'se'));
+  s.addEventListener('mousedown',e=>startResize(e,'s'));
+  e_.addEventListener('mousedown',e=>startResize(e,'e'));
+  document.addEventListener('mousemove',e=>{
+    if(!rs) return;
+    if(dir==='se'||dir==='e') win.style.width=Math.max(300,sw+(e.clientX-sx))+'px';
+    if(dir==='se'||dir==='s') win.style.height=Math.max(180,sh+(e.clientY-sy))+'px';
+  });
+  document.addEventListener('mouseup',()=>rs=false);
+}
+
+function createWindow(id,title,width,height,iconSvg,content){
+  const existing=document.getElementById('win-'+id);
+  if(existing){
+    // If minimized, restore
+    if(winState[id]&&winState[id].minimized){
+      existing.style.display='flex';
+      existing.classList.add('restoring');
+      setTimeout(()=>existing.classList.remove('restoring'),200);
+      winState[id].minimized=false;
+    }
+    bringToFront(existing);
+    return existing;
+  }
+  const w=document.createElement('div');
+  w.className='win-window opening';
+  w.id='win-'+id; w.dataset.wid=id;
+  // Cascade offset
+  const offset=Object.keys(winState).length*24;
+  const cx=Math.round((innerWidth-width)/2)+offset;
+  const cy=Math.round((innerHeight-height)/2)+offset;
+  w.style.cssText=`left:${Math.min(cx,innerWidth-width-20)}px;top:${Math.max(20,Math.min(cy,innerHeight-height-60))}px;width:${width}px;height:${height}px;`;
+
+  w.innerHTML=`
+    <div class="win-titlebar" id="tbar-${id}">
+      <div class="win-icon">${iconSvg}</div>
+      <span class="win-title">${title}</span>
+      <div class="win-controls">
+        <button class="wc" title="Minimizar" onclick="minimizeWin('${id}')">
+          <svg viewBox="0 0 10 10"><rect x="0" y="4.5" width="10" height="1" fill="#4a4a4a"/></svg>
+        </button>
+        <button class="wc" title="Maximizar" id="maxbtn-${id}" onclick="toggleMax('${id}')">
+          <svg viewBox="0 0 10 10"><path d=".5.5h9v9H.5z" stroke="#4a4a4a" stroke-width="1" fill="none"/></svg>
+        </button>
+        <button class="wc close" title="Fechar" onclick="closeWin('${id}')">
+          <svg viewBox="0 0 10 10" fill="none">
+            <line x1="1" y1="1" x2="9" y2="9" stroke="#4a4a4a" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="9" y1="1" x2="1" y2="9" stroke="#4a4a4a" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    ${content}
+  `;
+  document.getElementById('desktop').appendChild(w);
+  winState[id]={el:w,minimized:false,maxed:false,prevRect:{}};
+  makeDraggable(w,w.querySelector('.win-titlebar'));
+  makeResizable(w);
+  w.addEventListener('mousedown',()=>bringToFront(w));
+  setTimeout(()=>w.classList.remove('opening'),220);
+  bringToFront(w);
+  const tb=document.getElementById('tb-'+id);
+  if(tb){tb.classList.add('active');tb.classList.remove('running');}
+  return w;
+}
+
+// Taskbar button toggle
+function tbToggle(id){
+  const w=document.getElementById('win-'+id);
+  if(!w){ openWindow(id); return; }
+  const st=winState[id];
+  if(!st) return;
+  if(st.minimized){ // restore
+    w.style.display='flex';
+    w.classList.add('restoring');
+    setTimeout(()=>w.classList.remove('restoring'),200);
+    st.minimized=false;
+    bringToFront(w);
+  } else if(w.classList.contains('focused')){ // minimize if already focused
+    minimizeWin(id);
+  } else { // bring to front
+    bringToFront(w);
+  }
+}
+
+function minimizeWin(id){
+  const w=document.getElementById('win-'+id);
+  if(!w) return;
+  w.classList.add('minimizing');
+  setTimeout(()=>{w.style.display='none';w.classList.remove('minimizing');},150);
+  winState[id].minimized=true;
+  w.classList.remove('focused');
+  const tb=document.getElementById('tb-'+id);
+  if(tb){tb.classList.remove('active');tb.classList.add('running');}
+}
+
+function closeWin(id){
+  const w=document.getElementById('win-'+id);
+  if(!w) return;
+  w.classList.add('minimizing');
+  setTimeout(()=>w.remove(),150);
+  delete winState[id];
+  const tb=document.getElementById('tb-'+id);
+  if(tb){tb.classList.remove('active');tb.classList.add('running');}
+}
+
+function toggleMax(id){
+  const w=document.getElementById('win-'+id);
+  if(!w) return;
+  const st=winState[id];
+  if(!st.maxed){
+    st.prevRect={l:w.style.left,t:w.style.top,width:w.style.width,height:w.style.height};
+    w.style.cssText+=`left:0;top:0;width:100vw;height:calc(100vh - var(--taskbar-h));border-radius:0;`;
+    w.style.left='0';w.style.top='0';w.style.width='100vw';
+    w.style.height=`calc(100vh - ${getComputedStyle(document.documentElement).getPropertyValue('--taskbar-h')})`;
+    w.style.borderRadius='0'; st.maxed=true;
+  } else {
+    const r=st.prevRect;
+    w.style.left=r.l;w.style.top=r.t;w.style.width=r.width;w.style.height=r.height;
+    w.style.borderRadius='';st.maxed=false;
+  }
+}
+
+// ── OPEN WINDOWS ──
+function openWindow(id){
+  if(startOpen) toggleStart();
+  switch(id){
+    case 'explorer': openExplorer(); break;
+    case 'about':    openAbout();    break;
+    case 'dialog':   openDialog();   break;
+    case 'props':    openProps();    break;
+  }
+}
+
+function openExplorer(){
+  const icon=`<svg viewBox="0 0 16 16" width="16" height="16"><rect x="1" y="4" width="14" height="10" rx="1" fill="#FFB900"/><rect x="1" y="7" width="14" height="7" rx="1" fill="#FFC107"/><rect x="1" y="4" width="6" height="4" rx="1" fill="#FFB900"/></svg>`;
+  const files=[
+    {name:'dialog-virus.html',  icon:'🗒️', file:'dialog-virus.html'},
+    {name:'dialog-confirm.html',icon:'🗒️', file:'dialog-confirm.html'},
+    {name:'dialog-success.html',icon:'🗒️', file:'dialog-success.html'},
+    {name:'dialog-error.html',  icon:'🗒️', file:'dialog-error.html'},
+    {name:'about.html',         icon:'📄', file:'about.html'},
+    {name:'props.html',         icon:'📄', file:'props.html'},
+    {name:'README.md',          icon:'📋', file:null},
+    {name:'demo.html',          icon:'🌐', file:'demo.html'},
+    {name:'assets',             icon:'📁', file:null},
+  ];
+  const filesHtml=files.map(f=>`
+    <div class="file-item" ondblclick="${f.file?`openDemo('${f.file}')`:f.name==='README.md'?`openWindow('about')`:`showNotif('Explorador','${f.name}','Pasta — sem conteúdo para demonstração')`}" title="${f.name}${f.file?' — duplo clique para abrir':''}">
+      <div class="file-icon">${f.icon}</div>
+      <span class="file-label">${f.name}</span>
+    </div>
+  `).join('');
+  const content=`
+    <div style="background:#fafafa;border-bottom:1px solid #e4e4e4;padding:4px 8px;display:flex;align-items:center;gap:4px;flex-shrink:0;">
+      <button class="exp-nav-btn">← Voltar</button>
+      <button class="exp-nav-btn">→ Avançar</button>
+      <button class="exp-nav-btn">↑ Acima</button>
+      <div class="explorer-addr">📁 Este PC › Projetos › html-fake-window</div>
+      <button class="exp-nav-btn">🔍</button>
+    </div>
+    <div class="explorer-layout">
+      <div class="explorer-sidebar">
+        <div class="sidebar-section">FAVORITOS</div>
+        <div class="sidebar-item">⭐ Acesso rápido</div>
+        <div class="sidebar-item">🖥️ Desktop</div>
+        <div class="sidebar-item">⬇️ Downloads</div>
+        <div class="sidebar-item">📄 Documentos</div>
+        <div class="sidebar-section">REPOSITÓRIO</div>
+        <div class="sidebar-item active">📁 html-fake-window</div>
+        <div class="sidebar-item" style="padding-left:20px;color:#0078d4;">📁 assets</div>
+      </div>
+      <div class="explorer-files win-body">${filesHtml}</div>
+    </div>
+    <div class="explorer-statusbar">${files.length} itens &nbsp;·&nbsp; Duplo clique nos arquivos .html para abrir</div>
+  `;
+  createWindow('explorer','html-fake-window — Explorador de Arquivos',720,500,icon,content);
+}
+
+function openAbout(){
+  const icon=`<svg viewBox="0 0 16 16" width="16" height="16"><rect x="2" y="1" width="12" height="14" rx="2" fill="#0078d4"/></svg>`;
+  const content=`
+    <div class="win-body about-body">
+      <div class="about-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" width="72" height="72">
+          <rect x="2" y="2" width="31" height="31" rx="3" fill="#F35325"/>
+          <rect x="39" y="2" width="31" height="31" rx="3" fill="#81BC06"/>
+          <rect x="2" y="39" width="31" height="31" rx="3" fill="#05A6F0"/>
+          <rect x="39" y="39" width="31" height="31" rx="3" fill="#FFBA08"/>
+        </svg>
+      </div>
+      <div class="about-name">html-fake-window</div>
+      <div class="about-version">Versão 1.0.0 &nbsp;·&nbsp; MIT License</div>
+      <div class="about-desc">Repositório de janelas (dialogs) estilo Windows 11 feitas com HTML, CSS e JavaScript puro — sem frameworks, sem dependências externas.</div>
+      <div class="about-badges">
+        <span class="badge">HTML</span>
+        <span class="badge">CSS</span>
+        <span class="badge">JavaScript</span>
+        <span class="badge">Windows 11</span>
+        <span class="badge">Drag &amp; Drop</span>
+        <span class="badge">Touch</span>
+      </div>
+      <div style="font-size:12px;color:#555;line-height:1.8;text-align:left;width:100%;max-width:300px;border-top:1px solid #eee;padding-top:12px;">
+        <strong>Funcionalidades:</strong><br>
+        ✅ Arrastar com mouse e touch<br>
+        ✅ Minimizar, maximizar e fechar<br>
+        ✅ Foco e z-index automático<br>
+        ✅ Resize dinâmico<br>
+        ✅ Leve e sem dependências
+      </div>
+      <div style="font-size:11px;color:#999;">© 2025 html-fake-window · github.com/html-fake-window</div>
+    </div>
+    <div class="win-footer">
+      <button class="wbtn primary" onclick="closeWin('about')">OK</button>
+    </div>
+  `;
+  createWindow('about','Sobre o html-fake-window',360,500,icon,content);
+}
+
+function openDialog(){
+  const icon=`<svg viewBox="0 0 16 16" width="16" height="16"><rect x="1" y="3" width="14" height="10" rx="2" fill="#f0f0f0" stroke="#bbb" stroke-width=".8"/><rect x="1" y="3" width="14" height="5" rx="2" fill="#e4e4e4"/></svg>`;
+  const demos=[
+    {title:'⚠️ Aviso de Vírus',color:'#ff9800',file:'dialog-virus.html',
+      msg:'Vírus detectado! Remova o arquivo infectado do sistema.'},
+    {title:'❓ Excluir Arquivos',color:'#0078d4',file:'dialog-confirm.html',
+      msg:'Confirme a exclusão permanente de arquivos da Lixeira.'},
+    {title:'✅ Instalação Concluída',color:'#107c10',file:'dialog-success.html',
+      msg:'A instalação foi concluída. Reinicie para aplicar as mudanças.'},
+    {title:'❌ Erro Crítico',color:'#c42b1c',file:'dialog-error.html',
+      msg:'Erro inesperado — código STOP: 0x0000007E. Detalhes disponíveis.'},
+  ];
+  const cards=demos.map(d=>`
+    <div class="demo-card">
+      <div class="demo-card-head">${d.title}</div>
+      <div class="demo-card-body">
+        <div class="demo-card-msg">${d.msg}</div>
+        <button class="demo-open-btn" onclick="openDemo('${d.file}')">▶ Abrir</button>
+      </div>
+    </div>
+  `).join('');
+  const content=`
+    <div class="win-body" style="overflow-y:auto;">
+      <div style="padding:12px 14px 6px;font-size:11px;color:#666;border-bottom:1px solid #eee;margin-bottom:4px;">
+        Clique em <strong>▶ Abrir</strong> para abrir cada diálogo em uma nova aba.
+      </div>
+      <div class="demo-grid">${cards}</div>
+    </div>
+  `;
+  createWindow('dialog','Dialog Demo — html-fake-window',400,380,icon,content);
+}
+
+function openProps(){
+  const icon=`<svg viewBox="0 0 16 16" width="16" height="16"><circle cx="8" cy="8" r="6" fill="#f0f0f0" stroke="#bbb" stroke-width=".8"/><circle cx="8" cy="8" r="2.5" fill="#0078d4"/></svg>`;
+  const content=`
+    <div class="props-tabs">
+      <div class="props-tab active" onclick="propsTab(this)">Geral</div>
+      <div class="props-tab" onclick="propsTab(this)">Segurança</div>
+      <div class="props-tab" onclick="propsTab(this)">Detalhes</div>
+    </div>
+    <div class="win-body" style="padding:0;">
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;border-bottom:1px solid #eeeeee;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="52" height="52">
+          <rect x="4" y="8" width="40" height="32" rx="3" fill="#FFB900"/>
+          <rect x="4" y="16" width="40" height="24" rx="2" fill="#FFC107"/>
+          <rect x="4" y="8" width="17" height="9" rx="2" fill="#FFB900"/>
+        </svg>
+        <div>
+          <div style="font-size:15px;font-weight:400;color:#1a1a1a;margin-bottom:3px;">html-fake-window</div>
+          <div style="font-size:11px;color:#777;">Pasta de arquivos</div>
+        </div>
+      </div>
+      <table class="props-table">
+        <tr><td>Tipo</td><td>Pasta de arquivos</td></tr>
+        <tr><td>Localização</td><td>C:\Projetos</td></tr>
+        <tr><td>Tamanho</td><td>48,2 KB (49.356 bytes)</td></tr>
+        <tr><td>Tamanho em disco</td><td>52 KB (53.248 bytes)</td></tr>
+        <tr><td>Contém</td><td>9 arquivos, 1 pasta</td></tr>
+        <tr><td>Criado em</td><td>01/01/2025, 09:00:00</td></tr>
+        <tr><td>Modificado em</td><td>Hoje</td></tr>
+        <tr><td>Acessado em</td><td>Hoje</td></tr>
+        <tr><td>Licença</td><td>MIT — Uso livre</td></tr>
+        <tr><td>Repositório</td><td style="color:#0078d4;">github.com/html-fake-window</td></tr>
+        <tr><td>Versão</td><td>1.0.0</td></tr>
+      </table>
+    </div>
+    <div class="win-footer">
+      <button class="wbtn primary" onclick="closeWin('props')">OK</button>
+      <button class="wbtn" onclick="closeWin('props')">Cancelar</button>
+      <button class="wbtn">Aplicar</button>
+    </div>
+  `;
+  createWindow('props','Propriedades: html-fake-window',340,460,icon,content);
+}
+
+function propsTab(el){
+  document.querySelectorAll('.props-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// Open demo in new tab/window
+function openDemo(file){
+  const win=window.open(file,'_blank','width=520,height=420,toolbar=no,menubar=no');
+  if(!win) showNotif('Explorador','Abrir arquivo','Pop-up bloqueado — permita pop-ups no navegador para abrir os demos.');
+}
+
+// ── NOTIFICATION ──
+let notifTimer=null;
+function showNotif(app,title,body){
+  let n=document.getElementById('g-notif');
+  if(n) n.remove();
+  n=document.createElement('div');
+  n.id='g-notif'; n.className='notif';
+  n.innerHTML=`
+    <div style="flex-shrink:0;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" width="28" height="28">
+        <rect x="2" y="2" width="11" height="11" rx="1.5" fill="#F35325"/>
+        <rect x="15" y="2" width="11" height="11" rx="1.5" fill="#81BC06"/>
+        <rect x="2" y="15" width="11" height="11" rx="1.5" fill="#05A6F0"/>
+        <rect x="15" y="15" width="11" height="11" rx="1.5" fill="#FFBA08"/>
+      </svg>
+    </div>
+    <div style="flex:1;">
+      <div class="notif-app">${app}</div>
+      <div class="notif-title">${title}</div>
+      <div class="notif-body">${body}</div>
+    </div>
+    <button class="notif-close" onclick="this.parentElement.remove()">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="1" y1="1" x2="9" y2="9" stroke="rgba(255,255,255,.6)" stroke-width="1.2" stroke-linecap="round"/><line x1="9" y1="1" x2="1" y2="9" stroke="rgba(255,255,255,.6)" stroke-width="1.2" stroke-linecap="round"/></svg>
+    </button>
+  `;
+  document.getElementById('desktop').appendChild(n);
+  if(notifTimer) clearTimeout(notifTimer);
+  notifTimer=setTimeout(()=>n&&n.remove(),5000);
+}
+
+function openAllWindows(){
+  ['explorer','about','dialog','props'].forEach((id,i)=>setTimeout(()=>openWindow(id),i*130));
+}
+function closeAllWindows(){
+  document.querySelectorAll('.win-window').forEach(w=>{const id=w.dataset.wid;if(id)closeWin(id);});
+}
+
+// ── STARTUP ──
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    showNotif('html-fake-window','Bem-vindo!','Duplo clique nos ícones do desktop para abrir as janelas. Clique direito para o menu de contexto.');
+    openWindow('explorer');
+  },700);
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeCtx();
+  if((e.metaKey||e.ctrlKey)&&e.key==='1') openWindow('explorer');
+  if((e.metaKey||e.ctrlKey)&&e.key==='2') openWindow('dialog');
+  if((e.metaKey||e.ctrlKey)&&e.key==='3') openWindow('about');
+});
+</script>
+</body>
+</html>
