@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<title>Bem-vindos ao site oficial do Minecraft</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;font-size:12px;display:flex;align-items:center;justify-content:center;background:#008080;}
+ 
+body {
+    /* Define a imagem de fundo */
+    background-image: url('fundo.png');
+
+    /* Faz a imagem cobrir toda a tela */
+    background-size: cover;
+
+    /* Centraliza a imagem */
+    background-position: center;
+
+    /* Evita que a imagem se repita */
+    background-repeat: no-repeat;
+
+    /* Faz com que a imagem fique fixa ao rolar a página */
+    background-attachment: fixed;
+}
+
+.dialog{position:fixed;width:355px;background:#f0f0f0;border:1px solid #999;border-radius:8px;box-shadow:0 0 0 1px rgba(255,255,255,.55) inset,0 12px 40px rgba(0,0,0,.55),0 3px 10px rgba(0,0,0,.3);overflow:hidden;z-index:100;}
+ 
+.titlebar{height:32px;background:linear-gradient(180deg,#f8f8f8 0%,#efefef 100%);border-bottom:1px solid #d0d0d0;display:flex;align-items:center;padding:0 0 0 12px;cursor:move;user-select:none;}
+.titlebar-icon{width:16px;height:16px;margin-right:6px;flex-shrink:0;}
+.titlebar-text{flex:1;font-size:12px;color:#000;font-weight:400;pointer-events:none;}
+.win-btns{display:flex;height:32px;}
+.wc{width:46px;height:32px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:default;transition:background .08s;}
+.wc svg{width:10px;height:10px;pointer-events:none;}
+.wc:hover{background:rgba(0,0,0,.07);}
+.wc.close{border-radius:0 8px 0 0;}
+.wc.close:hover{background:#c42b1c;}
+.wc.close:hover line{stroke:#fff;}
+ 
+.dialog-body{background:#fff;padding:20px 20px 18px 20px;border-bottom:1px solid #ddd;min-height:68px;display:flex;align-items:center;}
+.dialog-msg{font-size:12px;color:#000;line-height:1.5;}
+ 
+.dialog-foot{padding:9px 10px 11px;display:flex;justify-content:flex-end;gap:7px;background:#f0f0f0;}
+.wbtn{height:24px;min-width:75px;padding:0 10px;font:12px 'Segoe UI',Tahoma,sans-serif;color:#000;background:#f0f0f0;border:1px solid #adadad;border-radius:3px;cursor:default;display:flex;align-items:center;justify-content:center;outline:none;box-shadow:0 1px 0 rgba(255,255,255,.9) inset;transition:background .07s,border-color .07s;}
+.wbtn:hover{background:#e5f1fb;border-color:#7eb4ea;}
+.wbtn:active{background:#cce2f8;border-color:#5a9ad8;box-shadow:inset 0 1px 2px rgba(0,0,0,.08);}
+.wbtn:focus{border-color:#7eb4ea;box-shadow:0 0 0 2px rgba(126,180,234,.5);}
+</style>
+</head>
+<body>
+ 
+<div class="dialog" id="dialog">
+  <div class="titlebar" id="titlebar">
+    <img src="icon.png" class="titlebar-icon"/>
+    <span class="titlebar-text">aviso</span>
+    <div class="win-btns">
+      <button class="wc" title="Minimizar" onclick="dlg.style.display='none'">
+        <svg viewBox="0 0 10 10"><rect x="0" y="4.5" width="10" height="1" fill="#4a4a4a"/></svg>
+      </button>
+      <button class="wc" title="Maximizar" style="opacity:.45;cursor:default">
+        <svg viewBox="0 0 10 10"><path d="M.5.5h9v9H.5z" stroke="#4a4a4a" stroke-width="1" fill="none"/></svg>
+      </button>
+      <button class="wc close" title="Fechar" onclick="dlg.style.display='none'">
+        <svg viewBox="0 0 10 10" fill="none">
+          <line x1="1" y1="1" x2="9" y2="9" stroke="#4a4a4a" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="9" y1="1" x2="1" y2="9" stroke="#4a4a4a" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+ 
+  <div class="dialog-body">
+    <div class="dialog-msg">Virus detectado, você deseja remover o vírus?</div>
+  </div>
+ 
+  <div class="dialog-foot">
+    <button class="wbtn" id="btn-ok">sim</button>
+    <button class="wbtn" id="btn-cancel">colocar em quarentena
+    </button>
+  </div>
+</div>
+ 
+<script>
+const dlg = document.getElementById('dialog');
+const bar = document.getElementById('titlebar');
+ 
+/* centralizar */
+function center(){
+  dlg.style.left = Math.round((innerWidth  - dlg.offsetWidth)  / 2) + 'px';
+  dlg.style.top  = Math.round((innerHeight - dlg.offsetHeight) / 2) + 'px';
+}
+window.addEventListener('load', center);
+window.addEventListener('resize', center);
+ 
+/* arrastar — mouse */
+let drag=false, ox=0, oy=0;
+bar.addEventListener('mousedown', e=>{
+  if(e.target.closest('.wc')) return;
+  drag=true; ox=e.clientX-dlg.getBoundingClientRect().left; oy=e.clientY-dlg.getBoundingClientRect().top; e.preventDefault();
+});
+document.addEventListener('mousemove', e=>{
+  if(!drag) return;
+  dlg.style.left = Math.max(0, Math.min(e.clientX-ox, innerWidth -dlg.offsetWidth))  + 'px';
+  dlg.style.top  = Math.max(0, Math.min(e.clientY-oy, innerHeight-dlg.offsetHeight)) + 'px';
+});
+document.addEventListener('mouseup', ()=>drag=false);
+ 
+/* arrastar — touch */
+bar.addEventListener('touchstart', e=>{
+  if(e.target.closest('.wc')) return;
+  const t=e.touches[0]; drag=true; ox=t.clientX-dlg.getBoundingClientRect().left; oy=t.clientY-dlg.getBoundingClientRect().top;
+},{passive:true});
+document.addEventListener('touchmove', e=>{
+  if(!drag) return;
+  const t=e.touches[0];
+  dlg.style.left = Math.max(0, Math.min(t.clientX-ox, innerWidth -dlg.offsetWidth))  + 'px';
+  dlg.style.top  = Math.max(0, Math.min(t.clientY-oy, innerHeight-dlg.offsetHeight)) + 'px';
+},{passive:true});
+document.addEventListener('touchend', ()=>drag=false);
+ 
+/* botões */
+document.getElementById('btn-ok').onclick     = ()=>{ /* sua lógica aqui */ dlg.style.display='none'; };
+document.getElementById('btn-cancel').onclick  = ()=>dlg.style.display='none';
+document.addEventListener('keydown', e=>{
+  if(e.key==='Enter')  document.getElementById('btn-ok').click();
+  if(e.key==='Escape') document.getElementById('btn-cancel').click();
+});
+ 
+setTimeout(()=>document.getElementById('btn-ok').focus(), 100);
+</script>
+</body>
+</html>
+ 
