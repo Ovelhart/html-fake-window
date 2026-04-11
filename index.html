@@ -18,17 +18,9 @@ html,body{width:100%;height:100%;font-family:'Segoe UI',system-ui,sans-serif;fon
 /* ── WALLPAPER (Windows 11 Bloom style) ── */
 #desktop{
   width:100%;height:100%;position:relative;overflow:hidden;
-  background:
-    radial-gradient(ellipse 75% 55% at 18% 85%,rgba(255,60,170,.22) 0%,transparent 52%),
-    radial-gradient(ellipse 55% 70% at 82% 18%,rgba(80,130,255,.18) 0%,transparent 52%),
-    radial-gradient(ellipse 65% 65% at 58% 48%,rgba(170,50,220,.14) 0%,transparent 58%),
-    radial-gradient(ellipse 40% 40% at 35% 30%,rgba(255,100,180,.12) 0%,transparent 50%),
-    radial-gradient(ellipse 50% 50% at 70% 70%,rgba(100,60,200,.16) 0%,transparent 50%),
-    linear-gradient(145deg,#09091a 0%,#130832 25%,#0b1640 50%,#1a0838 75%,#09091a 100%);
-}
-#desktop::before{content:'';position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse 60% 45% at 38% 58%,rgba(255,130,210,.1) 0%,transparent 60%),
-             radial-gradient(ellipse 45% 60% at 64% 36%,rgba(130,170,255,.08) 0%,transparent 60%);
+  background-image: url('wallpaper.png');
+  background-size: cover;
+  background-position: center;
 }
 
 /* ── DESKTOP ICONS ── */
@@ -275,48 +267,99 @@ html,body{width:100%;height:100%;font-family:'Segoe UI',system-ui,sans-serif;fon
     <div class="desk-icon" ondblclick="openWindow('explorer')">
       <div class="desk-icon-img">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="40" height="40">
-          <rect x="4" y="14" width="40" height="28" rx="3" fill="#FFB900"/>
-          <rect x="4" y="20" width="40" height="22" rx="2" fill="#FFC107"/>
-          <rect x="4" y="14" width="18" height="8" rx="2" fill="#FFB900"/>
-        </svg>
+  <!-- sombra -->
+  <path d="M6 16h36a2 2 0 0 1 2 2v20a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V18a2 2 0 0 1 2-2z" fill="#E6A700"/>
+
+  <!-- corpo principal -->
+  <rect x="4" y="18" width="40" height="24" rx="4" fill="#FFC83D"/>
+
+  <!-- aba da pasta -->
+  <path d="M6 10h12l3 4h21a2 2 0 0 1 2 2v4H4v-6a4 4 0 0 1 2-4z" fill="#FFD95A"/>
+
+  <!-- brilho leve -->
+  <path d="M6 10h12l3 4h-14a2 2 0 0 0-2 2v-2a4 4 0 0 1 1-3z" fill="#FFF2A6" opacity="0.6"/>
+</svg>
       </div>
       <span class="desk-icon-label">html-fake-window</span>
     </div>
     <div class="desk-icon" ondblclick="openWindow('about')">
       <div class="desk-icon-img">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="40" height="40">
-          <rect x="8" y="4" width="32" height="40" rx="3" fill="#0078d4"/>
-          <rect x="13" y="13" width="22" height="2.5" rx="1.25" fill="white" opacity=".85"/>
-          <rect x="13" y="19" width="22" height="1.8" rx=".9" fill="white" opacity=".6"/>
-          <rect x="13" y="24" width="16" height="1.8" rx=".9" fill="white" opacity=".6"/>
-          <rect x="13" y="29" width="19" height="1.8" rx=".9" fill="white" opacity=".6"/>
-          <circle cx="24" cy="39" r="5" fill="white"/>
-          <text x="24" y="43" text-anchor="middle" font-size="8" font-weight="bold" fill="#0078d4">i</text>
-        </svg>
+  <!-- Fundo com leve arredondamento e sombra -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a8cff"/>
+      <stop offset="100%" stop-color="#006fd6"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="8" y="4" width="32" height="40" rx="6" fill="url(#bg)"/>
+
+  <!-- Brilho sutil -->
+  <rect x="8" y="4" width="32" height="12" rx="6" fill="white" opacity="0.08"/>
+
+  <!-- Linhas (texto) -->
+  <rect x="14" y="14" width="20" height="2.6" rx="1.3" fill="white" opacity="0.9"/>
+  <rect x="14" y="20" width="20" height="2" rx="1" fill="white" opacity="0.65"/>
+  <rect x="14" y="25" width="15" height="2" rx="1" fill="white" opacity="0.65"/>
+  <rect x="14" y="30" width="18" height="2" rx="1" fill="white" opacity="0.65"/>
+
+  <!-- Ícone de info com fundo mais suave -->
+  <circle cx="24" cy="38.5" r="5.5" fill="white" opacity="0.95"/>
+  
+  <!-- Letra "i" centralizada melhor -->
+  <text x="24" y="41.5" text-anchor="middle" font-size="9" font-weight="bold" fill="#0078d4" font-family="Segoe UI, Arial, sans-serif">
+    i
+  </text>
+</svg>
       </div>
       <span class="desk-icon-label">README.md</span>
     </div>
     <div class="desk-icon" ondblclick="openWindow('dialog')">
       <div class="desk-icon-img">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="40" height="40">
-          <rect x="6" y="10" width="36" height="28" rx="4" fill="#f0f0f0" stroke="#bbb" stroke-width="1.5"/>
-          <rect x="6" y="10" width="36" height="11" rx="4" fill="#e4e4e4"/>
-          <rect x="14" y="31" width="10" height="5" rx="2.5" fill="#0078d4"/>
-          <rect x="27" y="31" width="10" height="5" rx="2.5" fill="#ccc"/>
-        </svg>
+  <!-- sombra -->
+  <rect x="7" y="11" width="34" height="26" rx="6" fill="#000" opacity="0.08"/>
+
+  <!-- janela -->
+  <rect x="6" y="10" width="36" height="28" rx="6" fill="#f5f5f5" stroke="#cfcfcf" stroke-width="1.2"/>
+
+  <!-- barra topo -->
+  <rect x="6" y="10" width="36" height="10" rx="6" fill="#e9e9e9"/>
+
+  <!-- botões -->
+  <circle cx="11" cy="15" r="1.2" fill="#ff5f57"/>
+  <circle cx="15" cy="15" r="1.2" fill="#ffbd2e"/>
+  <circle cx="19" cy="15" r="1.2" fill="#28c840"/>
+
+  <!-- botões inferiores -->
+  <rect x="13" y="30" width="10" height="5" rx="2.5" fill="#1976d2"/>
+  <rect x="25" y="30" width="10" height="5" rx="2.5" fill="#d0d0d0"/>
+</svg>
       </div>
       <span class="desk-icon-label">Dialog Demo</span>
     </div>
     <div class="desk-icon" ondblclick="openWindow('props')">
       <div class="desk-icon-img">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="40" height="40">
-          <circle cx="24" cy="24" r="20" fill="#f0f0f0" stroke="#bbb" stroke-width="1.5"/>
-          <circle cx="24" cy="24" r="7" fill="#0078d4"/>
-          <line x1="24" y1="4" x2="24" y2="12" stroke="#bbb" stroke-width="2.5" stroke-linecap="round"/>
-          <line x1="24" y1="36" x2="24" y2="44" stroke="#bbb" stroke-width="2.5" stroke-linecap="round"/>
-          <line x1="4" y1="24" x2="12" y2="24" stroke="#bbb" stroke-width="2.5" stroke-linecap="round"/>
-          <line x1="36" y1="24" x2="44" y2="24" stroke="#bbb" stroke-width="2.5" stroke-linecap="round"/>
-        </svg>
+  <!-- sombra -->
+  <circle cx="24" cy="25" r="19" fill="#000" opacity="0.08"/>
+
+  <!-- círculo externo -->
+  <circle cx="24" cy="24" r="20" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="1.2"/>
+
+  <!-- linhas (mais suaves) -->
+  <line x1="24" y1="6" x2="24" y2="12" stroke="#c2c2c2" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="24" y1="36" x2="24" y2="42" stroke="#c2c2c2" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="6" y1="24" x2="12" y2="24" stroke="#c2c2c2" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="36" y1="24" x2="42" y2="24" stroke="#c2c2c2" stroke-width="2.2" stroke-linecap="round"/>
+
+  <!-- círculo interno -->
+  <circle cx="24" cy="24" r="7" fill="#1e88e5"/>
+
+  <!-- highlight sutil -->
+  <circle cx="22" cy="22" r="2" fill="#ffffff" opacity="0.5"/>
+</svg>
       </div>
       <span class="desk-icon-label">Propriedades</span>
     </div>
@@ -345,19 +388,106 @@ html,body{width:100%;height:100%;font-family:'Segoe UI',system-ui,sans-serif;fon
       <!-- Pinned apps -->
       <button class="tb-btn running" id="tb-explorer" onclick="tbToggle('explorer')">
         <div class="tb-tip">Explorador de Arquivos</div>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><rect x="2" y="6" width="18" height="14" rx="1.5" fill="#FFB900"/><rect x="2" y="10" width="18" height="10" rx="1" fill="#FFC107"/><rect x="2" y="6" width="8" height="5" rx="1" fill="#FFB900"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="40" height="40">
+  <!-- sombra -->
+  <path d="M6 16h36a2 2 0 0 1 2 2v20a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V18a2 2 0 0 1 2-2z" fill="#E6A700"/>
+
+  <!-- corpo principal -->
+  <rect x="4" y="18" width="40" height="24" rx="4" fill="#FFC83D"/>
+
+  <!-- aba da pasta -->
+  <path d="M6 10h12l3 4h21a2 2 0 0 1 2 2v4H4v-6a4 4 0 0 1 2-4z" fill="#FFD95A"/>
+
+  <!-- brilho leve -->
+  <path d="M6 10h12l3 4h-14a2 2 0 0 0-2 2v-2a4 4 0 0 1 1-3z" fill="#FFF2A6" opacity="0.6"/>
+</svg>
+  <!-- sombra -->
+  <path d="M6 16h36a2 2 0 0 1 2 2v20a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V18a2 2 0 0 1 2-2z" fill="#E6A700"/>
+
+  <!-- corpo principal -->
+  <rect x="4" y="18" width="40" height="24" rx="4" fill="#FFC83D"/>
+
+  <!-- aba da pasta -->
+  <path d="M6 10h12l3 4h21a2 2 0 0 1 2 2v4H4v-6a4 4 0 0 1 2-4z" fill="#FFD95A"/>
+
+  <!-- brilho leve -->
+  <path d="M6 10h12l3 4h-14a2 2 0 0 0-2 2v-2a4 4 0 0 1 1-3z" fill="#FFF2A6" opacity="0.6"/>
+</svg>
       </button>
       <button class="tb-btn" id="tb-about" onclick="tbToggle('about')">
         <div class="tb-tip">README</div>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><rect x="3" y="2" width="16" height="18" rx="2" fill="#0078d4" opacity=".9"/><rect x="6" y="7" width="10" height="1.5" rx=".75" fill="white" opacity=".8"/><rect x="6" y="10.5" width="10" height="1.2" rx=".6" fill="white" opacity=".55"/><rect x="6" y="13.5" width="7" height="1.2" rx=".6" fill="white" opacity=".55"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="40" height="40">
+  <!-- Fundo com leve arredondamento e sombra -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a8cff"/>
+      <stop offset="100%" stop-color="#006fd6"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="8" y="4" width="32" height="40" rx="6" fill="url(#bg)"/>
+
+  <!-- Brilho sutil -->
+  <rect x="8" y="4" width="32" height="12" rx="6" fill="white" opacity="0.08"/>
+
+  <!-- Linhas (texto) -->
+  <rect x="14" y="14" width="20" height="2.6" rx="1.3" fill="white" opacity="0.9"/>
+  <rect x="14" y="20" width="20" height="2" rx="1" fill="white" opacity="0.65"/>
+  <rect x="14" y="25" width="15" height="2" rx="1" fill="white" opacity="0.65"/>
+  <rect x="14" y="30" width="18" height="2" rx="1" fill="white" opacity="0.65"/>
+
+  <!-- Ícone de info com fundo mais suave -->
+  <circle cx="24" cy="38.5" r="5.5" fill="white" opacity="0.95"/>
+  
+  <!-- Letra "i" centralizada melhor -->
+  <text x="24" y="41.5" text-anchor="middle" font-size="9" font-weight="bold" fill="#0078d4" font-family="Segoe UI, Arial, sans-serif">
+    i
+  </text>
+</svg>
       </button>
       <button class="tb-btn" id="tb-dialog" onclick="tbToggle('dialog')">
         <div class="tb-tip">Dialog Demo</div>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><rect x="2" y="4" width="18" height="14" rx="2" fill="#f0f0f0" stroke="#aaa" stroke-width=".8"/><rect x="2" y="4" width="18" height="6" rx="2" fill="#e4e4e4"/><rect x="5" y="13" width="5" height="2" rx="1" fill="#0078d4"/><rect x="12" y="13" width="5" height="2" rx="1" fill="#ccc"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="40" height="40">
+  <!-- sombra -->
+  <rect x="7" y="11" width="34" height="26" rx="6" fill="#000" opacity="0.08"/>
+
+  <!-- janela -->
+  <rect x="6" y="10" width="36" height="28" rx="6" fill="#f5f5f5" stroke="#cfcfcf" stroke-width="1.2"/>
+
+  <!-- barra topo -->
+  <rect x="6" y="10" width="36" height="10" rx="6" fill="#e9e9e9"/>
+
+  <!-- botões -->
+  <circle cx="11" cy="15" r="1.2" fill="#ff5f57"/>
+  <circle cx="15" cy="15" r="1.2" fill="#ffbd2e"/>
+  <circle cx="19" cy="15" r="1.2" fill="#28c840"/>
+
+  <!-- botões inferiores -->
+  <rect x="13" y="30" width="10" height="5" rx="2.5" fill="#1976d2"/>
+  <rect x="25" y="30" width="10" height="5" rx="2.5" fill="#d0d0d0"/>
+</svg>
       </button>
       <button class="tb-btn" id="tb-props" onclick="tbToggle('props')">
         <div class="tb-tip">Propriedades</div>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="#f0f0f0" stroke="#bbb" stroke-width=".8"/><circle cx="11" cy="11" r="3" fill="#0078d4"/><line x1="11" y1="3" x2="11" y2="6" stroke="#bbb" stroke-width="1.3"/><line x1="11" y1="16" x2="11" y2="19" stroke="#bbb" stroke-width="1.3"/><line x1="3" y1="11" x2="6" y2="11" stroke="#bbb" stroke-width="1.3"/><line x1="16" y1="11" x2="19" y2="11" stroke="#bbb" stroke-width="1.3"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="40" height="40">
+  <!-- sombra -->
+  <circle cx="24" cy="25" r="19" fill="#000" opacity="0.08"/>
+
+  <!-- círculo externo -->
+  <circle cx="24" cy="24" r="20" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="1.2"/>
+
+  <!-- linhas (mais suaves) -->
+  <line x1="24" y1="6" x2="24" y2="12" stroke="#c2c2c2" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="24" y1="36" x2="24" y2="42" stroke="#c2c2c2" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="6" y1="24" x2="12" y2="24" stroke="#c2c2c2" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="36" y1="24" x2="42" y2="24" stroke="#c2c2c2" stroke-width="2.2" stroke-linecap="round"/>
+
+  <!-- círculo interno -->
+  <circle cx="24" cy="24" r="7" fill="#1e88e5"/>
+
+  <!-- highlight sutil -->
+  <circle cx="22" cy="22" r="2" fill="#ffffff" opacity="0.5"/>
+</svg>
       </button>
     </div>
 
@@ -382,7 +512,19 @@ html,body{width:100%;height:100%;font-family:'Segoe UI',system-ui,sans-serif;fon
     <div class="sm-apps" id="sm-apps-grid">
       <div class="sm-app" data-label="explorador" onclick="openWindow('explorer');toggleStart()">
         <div class="sm-app-icon" style="background:rgba(255,180,0,.15);">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" width="26" height="26"><rect x="2" y="6" width="18" height="14" rx="1.5" fill="#FFB900"/><rect x="2" y="10" width="18" height="10" rx="1" fill="#FFC107"/><rect x="2" y="6" width="8" height="5" rx="1" fill="#FFB900"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="40" height="40">
+  <!-- sombra -->
+  <path d="M6 16h36a2 2 0 0 1 2 2v20a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V18a2 2 0 0 1 2-2z" fill="#E6A700"/>
+
+  <!-- corpo principal -->
+  <rect x="4" y="18" width="40" height="24" rx="4" fill="#FFC83D"/>
+
+  <!-- aba da pasta -->
+  <path d="M6 10h12l3 4h21a2 2 0 0 1 2 2v4H4v-6a4 4 0 0 1 2-4z" fill="#FFD95A"/>
+
+  <!-- brilho leve -->
+  <path d="M6 10h12l3 4h-14a2 2 0 0 0-2 2v-2a4 4 0 0 1 1-3z" fill="#FFF2A6" opacity="0.6"/>
+</svg>
         </div>
         <span class="sm-app-label">Explorador</span>
       </div>
@@ -400,7 +542,25 @@ html,body{width:100%;height:100%;font-family:'Segoe UI',system-ui,sans-serif;fon
       </div>
       <div class="sm-app" data-label="propriedades" onclick="openWindow('props');toggleStart()">
         <div class="sm-app-icon" style="background:rgba(255,255,255,.07);">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" width="26" height="26"><circle cx="11" cy="11" r="8.5" fill="rgba(255,255,255,.1)" stroke="rgba(255,255,255,.3)" stroke-width=".8"/><circle cx="11" cy="11" r="3" fill="#0078d4"/><line x1="11" y1="2" x2="11" y2="5.5" stroke="rgba(255,255,255,.4)" stroke-width="1.3"/><line x1="11" y1="16.5" x2="11" y2="20" stroke="rgba(255,255,255,.4)" stroke-width="1.3"/><line x1="2" y1="11" x2="5.5" y2="11" stroke="rgba(255,255,255,.4)" stroke-width="1.3"/><line x1="16.5" y1="11" x2="20" y2="11" stroke="rgba(255,255,255,.4)" stroke-width="1.3"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="40" height="40">
+  <!-- sombra -->
+  <circle cx="24" cy="25" r="19" fill="#000" opacity="0.08"/>
+
+  <!-- círculo externo -->
+  <circle cx="24" cy="24" r="20" fill="#f7f7f7" stroke="#d0d0d0" stroke-width="1.2"/>
+
+  <!-- linhas (mais suaves) -->
+  <line x1="24" y1="6" x2="24" y2="12" stroke="#c2c2c2" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="24" y1="36" x2="24" y2="42" stroke="#c2c2c2" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="6" y1="24" x2="12" y2="24" stroke="#c2c2c2" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="36" y1="24" x2="42" y2="24" stroke="#c2c2c2" stroke-width="2.2" stroke-linecap="round"/>
+
+  <!-- círculo interno -->
+  <circle cx="24" cy="24" r="7" fill="#1e88e5"/>
+
+  <!-- highlight sutil -->
+  <circle cx="22" cy="22" r="2" fill="#ffffff" opacity="0.5"/>
+</svg>
         </div>
         <span class="sm-app-label">Propriedades</span>
       </div>
@@ -705,7 +865,19 @@ function openWindow(id){
 }
 
 function openExplorer(){
-  const icon=`<svg viewBox="0 0 16 16" width="16" height="16"><rect x="1" y="4" width="14" height="10" rx="1" fill="#FFB900"/><rect x="1" y="7" width="14" height="7" rx="1" fill="#FFC107"/><rect x="1" y="4" width="6" height="4" rx="1" fill="#FFB900"/></svg>`;
+  const icon=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="40" height="40">
+  <!-- sombra -->
+  <path d="M6 16h36a2 2 0 0 1 2 2v20a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V18a2 2 0 0 1 2-2z" fill="#E6A700"/>
+
+  <!-- corpo principal -->
+  <rect x="4" y="18" width="40" height="24" rx="4" fill="#FFC83D"/>
+
+  <!-- aba da pasta -->
+  <path d="M6 10h12l3 4h21a2 2 0 0 1 2 2v4H4v-6a4 4 0 0 1 2-4z" fill="#FFD95A"/>
+
+  <!-- brilho leve -->
+  <path d="M6 10h12l3 4h-14a2 2 0 0 0-2 2v-2a4 4 0 0 1 1-3z" fill="#FFF2A6" opacity="0.6"/>
+</svg>`;
   const files=[
     {name:'dialog-virus.html',  icon:'🗒️', file:'dialog-virus.html'},
     {name:'dialog-confirm.html',icon:'🗒️', file:'dialog-confirm.html'},
@@ -715,7 +887,6 @@ function openExplorer(){
     {name:'props.html',         icon:'📄', file:'props.html'},
     {name:'README.md',          icon:'📋', file:null},
     {name:'demo.html',          icon:'🌐', file:'demo.html'},
-    {name:'assets',             icon:'📁', file:null},
   ];
   const filesHtml=files.map(f=>`
     <div class="file-item" ondblclick="${f.file?`openDemo('${f.file}')`:f.name==='README.md'?`openWindow('about')`:`showNotif('Explorador','${f.name}','Pasta — sem conteúdo para demonstração')`}" title="${f.name}${f.file?' — duplo clique para abrir':''}">
@@ -728,7 +899,7 @@ function openExplorer(){
       <button class="exp-nav-btn">← Voltar</button>
       <button class="exp-nav-btn">→ Avançar</button>
       <button class="exp-nav-btn">↑ Acima</button>
-      <div class="explorer-addr">📁 Este PC › Projetos › html-fake-window</div>
+      <div class="explorer-addr">📁 Este PC › Ovelhart › html-fake-window</div>
       <button class="exp-nav-btn">🔍</button>
     </div>
     <div class="explorer-layout">
@@ -740,7 +911,6 @@ function openExplorer(){
         <div class="sidebar-item">📄 Documentos</div>
         <div class="sidebar-section">REPOSITÓRIO</div>
         <div class="sidebar-item active">📁 html-fake-window</div>
-        <div class="sidebar-item" style="padding-left:20px;color:#0078d4;">📁 assets</div>
       </div>
       <div class="explorer-files win-body">${filesHtml}</div>
     </div>
@@ -771,15 +941,93 @@ function openAbout(){
         <span class="badge">Drag &amp; Drop</span>
         <span class="badge">Touch</span>
       </div>
-      <div style="font-size:12px;color:#555;line-height:1.8;text-align:left;width:100%;max-width:300px;border-top:1px solid #eee;padding-top:12px;">
-        <strong>Funcionalidades:</strong><br>
-        ✅ Arrastar com mouse e touch<br>
-        ✅ Minimizar, maximizar e fechar<br>
-        ✅ Foco e z-index automático<br>
-        ✅ Resize dinâmico<br>
-        ✅ Leve e sem dependências
-      </div>
-      <div style="font-size:11px;color:#999;">© 2025 html-fake-window · https://github.com/Ovelhart/html-fake-window</div>
+      
+      <div style="font-family: Arial, sans-serif; max-width: 800px; margin: auto; line-height: 1.6; color: #111;">
+
+  <div style="text-align:center;">
+    <h1 style="margin-bottom:5px;">🪟 html-fake-window</h1>
+    <p style="color:#555;">Janelas estilo Windows 11 com HTML, CSS e JS puro</p>
+  </div>
+
+  <hr>
+
+  <div>
+    <h2>📦 Arquivos</h2>
+    <ul>
+      <li>index.html — Desktop</li>
+      <li>about.html — Sobre</li>
+      <li>props.html — Propriedades</li>
+      <li>demo.html — Demo</li>
+      <li>dialog-*.html — Diálogos</li>
+    </ul>
+  </div>
+
+  <div>
+    <h2>🚀 Uso</h2>
+    <p>Abra direto no navegador:</p>
+    <div style="background:#f4f4f4; padding:10px; border-radius:6px;">
+      open index.html
+    </div>
+
+    <p style="margin-top:10px;">Ou servidor local:</p>
+    <div style="background:#f4f4f4; padding:10px; border-radius:6px;">
+      npx serve .<br>
+      python -m http.server
+    </div>
+  </div>
+
+  <div>
+    <h2>✨ Recursos</h2>
+    <ul>
+      <li>Drag (mouse + touch)</li>
+      <li>Min / Max / Close</li>
+      <li>Resize e foco automático</li>
+      <li>Atalhos (Enter / Esc)</li>
+      <li>Taskbar + Menu Iniciar</li>
+      <li>Sem dependências</li>
+    </ul>
+  </div>
+
+  <div>
+    <h2>🎨 Diálogos</h2>
+    <ul>
+      <li>⚠️ Vírus</li>
+      <li>🗑️ Confirmação</li>
+      <li>✅ Sucesso</li>
+      <li>❌ Erro</li>
+      <li>📄 Sobre</li>
+      <li>⚙️ Propriedades</li>
+    </ul>
+  </div>
+
+  <div>
+    <h2>🎨 Personalização</h2>
+
+    <p><b>Cor:</b></p>
+    <div style="background:#f4f4f4; padding:10px; border-radius:6px;">
+      :root { --accent: #0078d4; }
+    </div>
+
+    <p style="margin-top:10px;"><b>Wallpaper:</b></p>
+    <div style="background:#f4f4f4; padding:10px; border-radius:6px;">
+      #desktop { background: url('wallpaper.jpg') center / cover no-repeat; }
+    </div>
+  </div>
+
+  <div>
+    <h2>🌐 Compatibilidade</h2>
+    <p>Chrome, Edge, Firefox, Safari + Mobile</p>
+  </div>
+
+  <hr>
+
+  <div style="text-align:center; color:#777; font-size:14px;">
+    HTML + CSS + JS puro · Windows 11 UI
+  </div>
+
+</div>
+
+      <div style="font-size:11px;color:#999;">© 2026 html-fake-window · https://github.com/Ovelhart/html-fake-window</div>
     </div>
     <div class="win-footer">
       <button class="wbtn primary" onclick="closeWin('about')">OK</button>
@@ -830,11 +1078,19 @@ function openProps(){
     </div>
     <div class="win-body" style="padding:0;">
       <div style="display:flex;align-items:center;gap:14px;padding:16px;border-bottom:1px solid #eeeeee;">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="52" height="52">
-          <rect x="4" y="8" width="40" height="32" rx="3" fill="#FFB900"/>
-          <rect x="4" y="16" width="40" height="24" rx="2" fill="#FFC107"/>
-          <rect x="4" y="8" width="17" height="9" rx="2" fill="#FFB900"/>
-        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="40" height="40">
+  <!-- sombra -->
+  <path d="M6 16h36a2 2 0 0 1 2 2v20a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V18a2 2 0 0 1 2-2z" fill="#E6A700"/>
+
+  <!-- corpo principal -->
+  <rect x="4" y="18" width="40" height="24" rx="4" fill="#FFC83D"/>
+
+  <!-- aba da pasta -->
+  <path d="M6 10h12l3 4h21a2 2 0 0 1 2 2v4H4v-6a4 4 0 0 1 2-4z" fill="#FFD95A"/>
+
+  <!-- brilho leve -->
+  <path d="M6 10h12l3 4h-14a2 2 0 0 0-2 2v-2a4 4 0 0 1 1-3z" fill="#FFF2A6" opacity="0.6"/>
+</svg>
         <div>
           <div style="font-size:15px;font-weight:400;color:#1a1a1a;margin-bottom:3px;">html-fake-window</div>
           <div style="font-size:11px;color:#777;">Pasta de arquivos</div>
@@ -842,11 +1098,11 @@ function openProps(){
       </div>
       <table class="props-table">
         <tr><td>Tipo</td><td>Pasta de arquivos</td></tr>
-        <tr><td>Localização</td><td>C:\Projetos</td></tr>
+        <tr><td>Localização</td><td>C:\Ovelhart </td></tr>
         <tr><td>Tamanho</td><td>48,2 KB (49.356 bytes)</td></tr>
         <tr><td>Tamanho em disco</td><td>52 KB (53.248 bytes)</td></tr>
         <tr><td>Contém</td><td>9 arquivos, 1 pasta</td></tr>
-        <tr><td>Criado em</td><td>01/01/2025, 09:00:00</td></tr>
+        <tr><td>Criado em</td><td>10/04/2026, 09:00:00</td></tr>
         <tr><td>Modificado em</td><td>Hoje</td></tr>
         <tr><td>Acessado em</td><td>Hoje</td></tr>
         <tr><td>Repositório</td><td style="color:#0078d4;">https://github.com/Ovelhart/html-fake-window</td></tr>
